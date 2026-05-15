@@ -1,0 +1,188 @@
+{
+  "llm_only": [
+    {
+      "question": "What drugs are co-mentioned with diabetes in research literature?",
+      "answer": "In research literature, diabetes is often co-mentioned with the following drugs:\n\n1. Metformin\n2. Insulin\n3. Sulfonylureas (e.g., glyburide, glipizide)\n4. Thiazolidinediones (e.g., pioglitazone)\n5. DPP-4 inhibitors (e.g., sitagliptin, saxagliptin)\n6. SGLT2 inhibitors (e.g., canagliflozin, empagliflozin)\n7. GLP-1 receptor agonists (e.g., liraglutide, exenatide)\n\nThese drugs are commonly used to manage and treat diabetes.",
+      "latency": 0.96,
+      "tokens": 217,
+      "reference": "In research literature, diabetes is frequently mentioned alongside antidiabetic medications such as metformin and insulin, which are the most commonly studied treatments. Other drugs including sulfonylureas and thiazolidinediones also appear regularly. Due to common comorbidities, cardiovascular and blood pressure medications are also frequently co-mentioned with diabetes in clinical studies.",
+      "entity_recall": 0.8,
+      "judge": "PASS",
+      "bertscore_f1": 0.8481,
+      "bertscore_precision": 0.8144,
+      "bertscore_recall": 0.8848
+    },
+    {
+      "question": "What symptoms appear in the same studies as metformin?",
+      "answer": "In studies, symptoms that appear in conjunction with metformin include gastrointestinal issues such as diarrhea, nausea, vomiting, and abdominal pain, as well as lactic acidosis in rare cases. Additionally, hypoglycemia, metallic taste, and vitamin B12 deficiency have also been noted.",
+      "latency": 0.67,
+      "tokens": 134,
+      "reference": "Studies involving metformin commonly report gastrointestinal symptoms such as nausea, diarrhea, and abdominal discomfort as the most frequent side effects. Lactic acidosis is a rare but serious condition mentioned in metformin research. Hyperglycemia, insulin resistance, and fatigue also appear in studies examining metformin's effects on type 2 diabetes management and blood sugar control.",
+      "entity_recall": 0.5,
+      "judge": "PASS",
+      "bertscore_f1": 0.9055,
+      "bertscore_precision": 0.9106,
+      "bertscore_recall": 0.9004
+    },
+    {
+      "question": "What treatments are researched alongside hypertension?",
+      "answer": "Treatments for conditions such as cardiovascular disease, diabetes, and kidney disease are often researched alongside hypertension, as these conditions frequently co-occur and share common risk factors. Additionally, researchers may investigate the effects of treatments for obesity, hyperlipidemia, and metabolic syndrome on hypertension.",
+      "latency": 0.7,
+      "tokens": 128,
+      "reference": "Hypertension research commonly studies several classes of antihypertensive drugs, including ACE inhibitors, beta-blockers, calcium channel blockers, and diuretics. Lifestyle modifications such as dietary changes, reduced sodium intake, and exercise are frequently examined alongside medication. Combination therapies targeting both blood pressure and cardiovascular risk are also widely studied.",
+      "entity_recall": 0.4,
+      "judge": "PASS",
+      "bertscore_f1": 0.8663,
+      "bertscore_precision": 0.8691,
+      "bertscore_recall": 0.8635
+    },
+    {
+      "question": "Which diseases are most connected to inflammation in medical research?",
+      "answer": "In medical research, diseases most connected to inflammation include:\n\n1. Arthritis (rheumatoid, osteoarthritis)\n2. Atherosclerosis (cardiovascular disease)\n3. Diabetes (type 2)\n4. Cancer (various types)\n5. Alzheimer's disease\n6. Asthma and chronic obstructive pulmonary disease (COPD)\n7. Inflammatory bowel disease (Crohn's, ulcerative colitis)\n\nThese conditions are often characterized by chronic or acute inflammation, which can contribute to disease progression and severity.",
+      "latency": 0.78,
+      "tokens": 184,
+      "reference": "Medical research most commonly connects inflammation with autoimmune and chronic diseases such as rheumatoid arthritis, inflammatory bowel disease, and asthma. Cardiovascular disease and type 2 diabetes are also strongly linked to chronic inflammation. Key inflammatory markers and mediators are studied in relation to these conditions, and anti-inflammatory treatments are frequently investigated.",
+      "entity_recall": 0.8,
+      "judge": "PASS",
+      "bertscore_f1": 0.8705,
+      "bertscore_precision": 0.8479,
+      "bertscore_recall": 0.8944
+    },
+    {
+      "question": "What drugs and symptoms are associated with cancer treatment research?",
+      "answer": "In cancer treatment research, common drugs associated include:\n\n1. Chemotherapy agents (e.g., doxorubicin, cyclophosphamide)\n2. Targeted therapies (e.g., trastuzumab, imatinib)\n3. Immunotherapies (e.g., pembrolizumab, nivolumab)\n4. Hormone therapies (e.g., tamoxifen, leuprolide)\n\nCommon symptoms and side effects associated with cancer treatment research include:\n\n1. Nausea and vomiting\n2. Fatigue\n3. Hair loss\n4. Neutropenia (low white blood cell count)\n5. Anemia (low red blood cell count)\n6. Pain\n7. Diarrhea or constipation\n8. Skin rashes or reactions\n\nThese symptoms and side effects can vary depending on the specific cancer type, treatment regimen, and individual patient response.",
+      "latency": 0.96,
+      "tokens": 259,
+      "reference": "Cancer treatment research frequently studies chemotherapy drugs and their associated side effects. Common symptoms investigated include nausea, fatigue, pain, and immune suppression. Targeted therapies and immunotherapy agents are increasingly studied alongside tumor response outcomes and patient survival rates. Managing treatment-related symptoms remains a major focus of oncology research.",
+      "entity_recall": 0.6667,
+      "judge": "PASS",
+      "bertscore_f1": 0.8321,
+      "bertscore_precision": 0.7908,
+      "bertscore_recall": 0.878
+    }
+  ],
+  "baseline": [
+    {
+      "question": "What drugs are co-mentioned with diabetes in research literature?",
+      "answer": "Based on the provided abstracts, the following drugs/medications are co-mentioned with diabetes: \n\n1. Noninsulin medications \n2. Antidiabetic agents \n\nNote: The abstracts do not specifically mention the names of particular drugs, but rather refer to categories of medications used to treat diabetes.",
+      "latency": 0.96,
+      "tokens": 633,
+      "reference": "In research literature, diabetes is frequently mentioned alongside antidiabetic medications such as metformin and insulin, which are the most commonly studied treatments. Other drugs including sulfonylureas and thiazolidinediones also appear regularly. Due to common comorbidities, cardiovascular and blood pressure medications are also frequently co-mentioned with diabetes in clinical studies.",
+      "entity_recall": 0.4,
+      "judge": "PASS",
+      "bertscore_f1": 0.8378,
+      "bertscore_precision": 0.8444,
+      "bertscore_recall": 0.8314
+    },
+    {
+      "question": "What symptoms appear in the same studies as metformin?",
+      "answer": "Based on the provided abstracts, the symptoms or conditions that appear in the same studies as metformin are:\n\n1. Type 2 diabetes mellitus (T2DM)\n2. Vitamin B deficiency (associated with long-term use of metformin)\n3. Ischemic stroke (in non-diabetic patients)\n4. Frailty and obesity (in older adults)\n\nNote that methamphetamine poisoning is mentioned in a separate abstract and is not directly related to metformin.",
+      "latency": 0.72,
+      "tokens": 683,
+      "reference": "Studies involving metformin commonly report gastrointestinal symptoms such as nausea, diarrhea, and abdominal discomfort as the most frequent side effects. Lactic acidosis is a rare but serious condition mentioned in metformin research. Hyperglycemia, insulin resistance, and fatigue also appear in studies examining metformin's effects on type 2 diabetes management and blood sugar control.",
+      "entity_recall": 0.1667,
+      "judge": "PASS",
+      "bertscore_f1": 0.8535,
+      "bertscore_precision": 0.8424,
+      "bertscore_recall": 0.865
+    },
+    {
+      "question": "What treatments are researched alongside hypertension?",
+      "answer": "Based on the provided abstracts, the following treatments are researched alongside hypertension:\n\n1. Cardiovascular treatments (mentioned in the context of reducing the incidence of cardiovascular events)\n2. Thiazide diuretics and calcium channel blockers (as common prescribed drugs for hypertension management)\n3. Pharmacological therapies (as the cornerstone of hypertension management)\n4. Non-pharmacological interventions (compared to pharmacological interventions for hypertension management)\n5. Stepwise work-up management strategy (for patients with clinically apparent resistant hypertension)",
+      "latency": 0.8,
+      "tokens": 631,
+      "reference": "Hypertension research commonly studies several classes of antihypertensive drugs, including ACE inhibitors, beta-blockers, calcium channel blockers, and diuretics. Lifestyle modifications such as dietary changes, reduced sodium intake, and exercise are frequently examined alongside medication. Combination therapies targeting both blood pressure and cardiovascular risk are also widely studied.",
+      "entity_recall": 0.6,
+      "judge": "PASS",
+      "bertscore_f1": 0.8508,
+      "bertscore_precision": 0.8327,
+      "bertscore_recall": 0.8696
+    },
+    {
+      "question": "Which diseases are most connected to inflammation in medical research?",
+      "answer": "Based on the provided abstracts, the diseases most connected to inflammation in medical research are:\n\n1. Diabetes mellitus and its complications (retinopathy, nephropathy, vasculopathy, and delayed wound healing)\n2. Inflammatory bowel disease (IBD)\n3. Asthma (severe asthmatics)\n4. Vascular disease (including atherosclerosis, myocardial infarction, and stroke)\n5. Allergic diseases\n\nThese diseases are all linked to inflammation, with various immune cells (such as neutrophils and eosinophils) and pathways (such as COX-2 and PGE) playing a role in their development and progression.",
+      "latency": 0.84,
+      "tokens": 683,
+      "reference": "Medical research most commonly connects inflammation with autoimmune and chronic diseases such as rheumatoid arthritis, inflammatory bowel disease, and asthma. Cardiovascular disease and type 2 diabetes are also strongly linked to chronic inflammation. Key inflammatory markers and mediators are studied in relation to these conditions, and anti-inflammatory treatments are frequently investigated.",
+      "entity_recall": 0.6,
+      "judge": "PASS",
+      "bertscore_f1": 0.8489,
+      "bertscore_precision": 0.8262,
+      "bertscore_recall": 0.873
+    },
+    {
+      "question": "What drugs and symptoms are associated with cancer treatment research?",
+      "answer": "Based on the provided abstracts, the following drugs and symptoms are associated with cancer treatment research:\n\nDrugs: \n1. Chemotherapy\n2. Selpercatinib\n3. Antibody-drug conjugates (ADCs)\n\nSymptoms: \n1. Adverse drug reactions (ADRs)\n2. Nausea\n3. Vomiting\n4. Symptom burden\n5. Psychological distress \n\nThese are associated with the treatment and management of cancer, and are being studied to improve patient outcomes and treatment satisfaction.",
+      "latency": 0.9,
+      "tokens": 610,
+      "reference": "Cancer treatment research frequently studies chemotherapy drugs and their associated side effects. Common symptoms investigated include nausea, fatigue, pain, and immune suppression. Targeted therapies and immunotherapy agents are increasingly studied alongside tumor response outcomes and patient survival rates. Managing treatment-related symptoms remains a major focus of oncology research.",
+      "entity_recall": 0.5,
+      "judge": "PASS",
+      "bertscore_f1": 0.8345,
+      "bertscore_precision": 0.8095,
+      "bertscore_recall": 0.8612
+    }
+  ],
+  "graphrag": [
+    {
+      "question": "What drugs are co-mentioned with diabetes in research literature?",
+      "answer": "Based on the 2-hop traversal of the knowledge graph, the co-mentioned entities with diabetes are:\n\n* Metformin (mentioned in 421 abstracts)\n* Insulin (mentioned in 317 abstracts)\n* Pioglitazone (mentioned in 187 abstracts)\n* Glipizide (mentioned in 142 abstracts)\n* Rosiglitazone (mentioned in 127 abstracts)\n* Sitagliptin (mentioned in 115 abstracts)\n\nThese drugs are frequently co-mentioned with diabetes in research literature, suggesting their relevance to the treatment and management of the disease.",
+      "latency": 0.98,
+      "tokens": 254,
+      "reference": "In research literature, diabetes is frequently mentioned alongside antidiabetic medications such as metformin and insulin, which are the most commonly studied treatments. Other drugs including sulfonylureas and thiazolidinediones also appear regularly. Due to common comorbidities, cardiovascular and blood pressure medications are also frequently co-mentioned with diabetes in clinical studies.",
+      "entity_recall": 0.6,
+      "judge": "PASS",
+      "bertscore_f1": 0.8347,
+      "bertscore_precision": 0.8206,
+      "bertscore_recall": 0.8494
+    },
+    {
+      "question": "What symptoms appear in the same studies as metformin?",
+      "answer": "Based on the 2-hop traversal of the knowledge graph, the co-mentioned entities that appear in the same studies as metformin are:\n\n* Hyperglycemia\n* Insulin Resistance\n* Type 2 Diabetes\n* Hypertension\n* Dyslipidemia\n* Obesity\n* Polycystic Ovary Syndrome (PCOS)\n* Glycemic Control\n* Cardiovascular Disease\n\nThese entities are mentioned in the same abstracts as metformin, suggesting that they are related to the symptoms, conditions, or outcomes studied in conjunction with metformin.",
+      "latency": 0.82,
+      "tokens": 250,
+      "reference": "Studies involving metformin commonly report gastrointestinal symptoms such as nausea, diarrhea, and abdominal discomfort as the most frequent side effects. Lactic acidosis is a rare but serious condition mentioned in metformin research. Hyperglycemia, insulin resistance, and fatigue also appear in studies examining metformin's effects on type 2 diabetes management and blood sugar control.",
+      "entity_recall": 0.5,
+      "judge": "PASS",
+      "bertscore_f1": 0.8434,
+      "bertscore_precision": 0.8241,
+      "bertscore_recall": 0.8636
+    },
+    {
+      "question": "What treatments are researched alongside hypertension?",
+      "answer": "Based on the 2-hop traversal of the knowledge graph, the co-mentioned entities alongside hypertension are:\n\n* Diabetes\n* Cardiovascular disease\n* Kidney disease\n* Hyperlipidemia\n* Atherosclerosis\n* Heart failure\n* Stroke\n\nThese entities are frequently co-mentioned with hypertension in research abstracts, indicating that they are often studied together and may be related to similar underlying mechanisms or treatment strategies.",
+      "latency": 0.7,
+      "tokens": 211,
+      "reference": "Hypertension research commonly studies several classes of antihypertensive drugs, including ACE inhibitors, beta-blockers, calcium channel blockers, and diuretics. Lifestyle modifications such as dietary changes, reduced sodium intake, and exercise are frequently examined alongside medication. Combination therapies targeting both blood pressure and cardiovascular risk are also widely studied.",
+      "entity_recall": 0.4,
+      "judge": "PASS",
+      "bertscore_f1": 0.8236,
+      "bertscore_precision": 0.8155,
+      "bertscore_recall": 0.832
+    },
+    {
+      "question": "Which diseases are most connected to inflammation in medical research?",
+      "answer": "Based on the 2-hop traversal of the knowledge graph, the diseases most connected to inflammation in medical research are:\n\n1. Arthritis\n2. Diabetes\n3. Cardiovascular disease\n4. Cancer\n5. Asthma\n\nThese diseases are frequently co-mentioned with inflammation in abstracts, indicating a strong connection between inflammation and these conditions in medical research.",
+      "latency": 0.62,
+      "tokens": 194,
+      "reference": "Medical research most commonly connects inflammation with autoimmune and chronic diseases such as rheumatoid arthritis, inflammatory bowel disease, and asthma. Cardiovascular disease and type 2 diabetes are also strongly linked to chronic inflammation. Key inflammatory markers and mediators are studied in relation to these conditions, and anti-inflammatory treatments are frequently investigated.",
+      "entity_recall": 0.8,
+      "judge": "PASS",
+      "bertscore_f1": 0.8627,
+      "bertscore_precision": 0.8532,
+      "bertscore_recall": 0.8725
+    },
+    {
+      "question": "What drugs and symptoms are associated with cancer treatment research?",
+      "answer": "Based on the 2-hop traversal of the knowledge graph, the co-mentioned entities associated with cancer treatment research are:\n\nDrugs: \n1. Tamoxifen\n2. Trastuzumab\n3. Cisplatin\n4. Doxorubicin\n5. Paclitaxel\n\nSymptoms: \n1. Nausea\n2. Fatigue\n3. Pain\n4. Anemia\n5. Neutropenia\n\nThese co-mentioned entities are frequently mentioned alongside \"cancer\" in research abstracts, indicating their relevance to cancer treatment research.",
+      "latency": 0.75,
+      "tokens": 251,
+      "reference": "Cancer treatment research frequently studies chemotherapy drugs and their associated side effects. Common symptoms investigated include nausea, fatigue, pain, and immune suppression. Targeted therapies and immunotherapy agents are increasingly studied alongside tumor response outcomes and patient survival rates. Managing treatment-related symptoms remains a major focus of oncology research.",
+      "entity_recall": 0.5,
+      "judge": "PASS",
+      "bertscore_f1": 0.819,
+      "bertscore_precision": 0.7884,
+      "bertscore_recall": 0.852
+    }
+  ]
+}

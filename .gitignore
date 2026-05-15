@@ -1,0 +1,31 @@
+# Credentials
+.env
+
+# Large generated data files
+pubmed_abstracts.json
+entities.json
+faiss_index.bin
+faiss_meta.json
+
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Stray files (artifact from debugging)
+0
+0.88
+2_000_000
+3]
+90.0
+float
+list[str]
+str
+
+# OS
+.DS_Store
+Thumbs.db

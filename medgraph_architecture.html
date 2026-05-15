@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedGraph RAG — Architecture Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #080c10;
+    font-family: 'IBM Plex Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 48px 32px;
+  }
+
+  .page {
+    width: 1100px;
+    background: #0d1117;
+    border: 1px solid #1e2d3d;
+    border-radius: 16px;
+    padding: 48px 52px 52px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* grid bg */
+  .page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(30,180,120,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30,180,120,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* corner accent */
+  .page::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle at 0 0, rgba(26,211,132,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-left {}
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(26,211,132,0.1);
+    border: 1px solid rgba(26,211,132,0.25);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: #1ad384;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #1ad384;
+    box-shadow: 0 0 6px #1ad384;
+  }
+
+  .title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 28px;
+    font-weight: 600;
+    color: #e8edf2;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .title span { color: #1ad384; }
+
+  .subtitle {
+    font-size: 13px;
+    color: #4a6478;
+    margin-top: 6px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding-top: 4px;
+  }
+
+  .stat {
+    text-align: right;
+  }
+
+  .stat-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .stat-val.green { color: #1ad384; }
+  .stat-val.amber { color: #f5a623; }
+  .stat-val.blue  { color: #4d9eff; }
+
+  .stat-label {
+    font-size: 10px;
+    color: #3d5166;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .stat-divider {
+    width: 1px;
+    height: 44px;
+    background: #1a2535;
+    margin-top: 2px;
+  }
+
+  /* ── LAYER WRAPPER ── */
+  .layers {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .layer {
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 14px 16px 16px;
+    position: relative;
+  }
+
+  .layer-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    position: absolute;
+    top: -1px;
+    left: 14px;
+    padding: 0 6px;
+    transform: translateY(-50%);
+  }
+
+  .layer.data    { border-color: #1a3d2a; background: rgba(26,61,42,0.12); }
+  .layer.storage { border-color: #1a2448; background: rgba(26,36,72,0.12); }
+  .layer.pipeline{ border-color: #2a1a2e; background: rgba(42,26,46,0.12); }
+  .layer.eval    { border-color: #2a2410; background: rgba(42,36,16,0.12); }
+
+  .layer.data     .layer-label { color: #1ad384; background: #0d1117; }
+  .layer.storage  .layer-label { color: #4d9eff; background: #0d1117; }
+  .layer.pipeline .layer-label { color: #b87fff; background: #0d1117; }
+  .layer.eval     .layer-label { color: #f5a623; background: #0d1117; }
+
+  /* ── NODES ── */
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .node {
+    border-radius: 8px;
+    border: 1px solid;
+    padding: 10px 14px;
+    position: relative;
+  }
+
+  .node-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .node-sub {
+    font-size: 10px;
+    font-weight: 400;
+    margin-top: 3px;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+
+  /* teal = data nodes */
+  .node.teal { border-color: #0e4d34; background: rgba(14,77,52,0.25); }
+  .node.teal .node-title { color: #1ad384; }
+  .node.teal .node-sub   { color: #2a7a56; }
+
+  /* blue = vector */
+  .node.blue { border-color: #0e2f55; background: rgba(14,47,85,0.25); }
+  .node.blue .node-title { color: #4d9eff; }
+  .node.blue .node-sub   { color: #1e4d7a; }
+
+  /* purple = graph */
+  .node.purple { border-color: #2a1a48; background: rgba(42,26,72,0.3); }
+  .node.purple .node-title { color: #b87fff; }
+  .node.purple .node-sub   { color: #5a3a88; }
+
+  /* coral = llm-only */
+  .node.coral { border-color: #4d2010; background: rgba(77,32,16,0.25); }
+  .node.coral .node-title { color: #ff6b3d; }
+  .node.coral .node-sub   { color: #7a3a20; }
+
+  /* amber = groq / query */
+  .node.amber { border-color: #4d3510; background: rgba(77,53,16,0.25); }
+  .node.amber .node-title { color: #f5a623; }
+  .node.amber .node-sub   { color: #7a5a20; }
+
+  /* green = eval */
+  .node.green { border-color: #0e3a1e; background: rgba(14,58,30,0.25); }
+  .node.green .node-title { color: #34d399; }
+  .node.green .node-sub   { color: #1a5a36; }
+
+  /* gray = output */
+  .node.gray { border-color: #1e2d3d; background: rgba(30,45,61,0.3); }
+  .node.gray .node-title { color: #8899aa; }
+  .node.gray .node-sub   { color: #3d5166; }
+
+  /* ── ARROWS ── */
+  .arrow-h {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+  }
+
+  .arrow-h svg { display: block; }
+
+  /* ── DATA LAYER ── */
+  .data-row { display: flex; align-items: center; gap: 0; }
+  .node-pubmed { flex: 0 0 220px; }
+  .node-ner    { flex: 0 0 240px; }
+  .node-embed  { flex: 0 0 210px; }
+
+  /* ── STORAGE LAYER ── */
+  .storage-row { display: flex; gap: 14px; }
+  .node-tg     { flex: 1; }
+  .node-faiss  { flex: 1; }
+
+  /* ── PIPELINE LAYER ── */
+  .pipeline-top {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .node-query { width: 220px; text-align: center; }
+
+  .pipeline-row { display: flex; align-items: flex-start; gap: 14px; }
+  .pipeline-row .node { flex: 1; }
+
+  .pipeline-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    margin: 8px 0;
+  }
+
+  .groq-row {
+    display: flex;
+    justify-content: center;
+  }
+  .node-groq { width: 280px; text-align: center; }
+
+  /* ── EVAL LAYER ── */
+  .eval-row { display: flex; gap: 14px; }
+  .eval-row .node { flex: 1; }
+
+  .output-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  .node-output { width: 200px; text-align: center; }
+
+  /* ── VERTICAL CONNECTORS ── */
+  .connector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 16px;
+    margin: 0;
+  }
+
+  .connector svg { display: block; }
+
+  /* ── METRIC PILLS ── */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-top: 5px;
+  }
+
+  .pill.green-pill { background: rgba(26,211,132,0.12); color: #1ad384; border: 1px solid rgba(26,211,132,0.2); }
+  .pill.amber-pill { background: rgba(245,166,35,0.12); color: #f5a623; border: 1px solid rgba(245,166,35,0.2); }
+  .pill.blue-pill  { background: rgba(77,158,255,0.12); color: #4d9eff; border: 1px solid rgba(77,158,255,0.2); }
+  .pill.coral-pill { background: rgba(255,107,61,0.12); color: #ff6b3d; border: 1px solid rgba(255,107,61,0.2); }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #111c28;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-left {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: #2a3d52;
+    letter-spacing: 0.06em;
+  }
+
+  .footer-right {
+    display: flex;
+    gap: 20px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: #3d5166;
+    font-weight: 400;
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="badge"><span class="badge-dot"></span>GraphRAG Inference Hackathon · TigerGraph</div>
+      <div class="title">MedGraph<span>RAG</span></div>
+      <div class="subtitle">System Architecture · PubMed Medical Knowledge Graph · 13,327 abstracts · 5.9M tokens</div>
+    </div>
+    <div class="header-stats">
+      <div class="stat">
+        <div class="stat-val green">64.2%</div>
+        <div class="stat-label">Token Reduction</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-val amber">100%</div>
+        <div class="stat-label">Judge Pass Rate</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-val blue">0.77s</div>
+        <div class="stat-label">GraphRAG Latency</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAYERS -->
+  <div class="layers">
+
+    <!-- DATA LAYER -->
+    <div class="layer data">
+      <div class="layer-label">01 · Data layer</div>
+      <div class="data-row">
+        <div class="node teal node-pubmed">
+          <div class="node-title">PubMed abstracts</div>
+          <div class="node-sub">NCBI E-utilities API<br>13,327 docs · ~5.9M tokens</div>
+        </div>
+        <div class="arrow-h">
+          <svg width="36" height="20"><line x1="0" y1="10" x2="28" y2="10" stroke="#1a3d2a" stroke-width="1.5"/><polygon points="26,6 34,10 26,14" fill="#1a3d2a"/></svg>
+        </div>
+        <div class="node teal node-ner">
+          <div class="node-title">Entity extraction</div>
+          <div class="node-sub">Disease · Drug · Symptom · Treatment<br>entities.json · extract_entities.py</div>
+        </div>
+        <div class="arrow-h">
+          <svg width="36" height="20"><line x1="0" y1="10" x2="28" y2="10" stroke="#1a3d2a" stroke-width="1.5"/><polygon points="26,6 34,10 26,14" fill="#1a3d2a"/></svg>
+        </div>
+        <div class="node teal node-embed">
+          <div class="node-title">Embeddings</div>
+          <div class="node-sub">sentence-transformers<br>all-MiniLM-L6-v2</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- connector -->
+    <div style="display:flex;gap:14px;padding:0 0;">
+      <div style="flex:1;display:flex;justify-content:center;">
+        <svg width="20" height="16"><line x1="10" y1="0" x2="10" y2="8" stroke="#1a3d2a" stroke-width="1.5"/><polygon points="6,7 10,15 14,7" fill="#1a3d2a"/></svg>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;">
+        <svg width="20" height="16"><line x1="10" y1="0" x2="10" y2="8" stroke="#1a3d2a" stroke-width="1.5"/><polygon points="6,7 10,15 14,7" fill="#1a3d2a"/></svg>
+      </div>
+    </div>
+
+    <!-- STORAGE LAYER -->
+    <div class="layer storage">
+      <div class="layer-label">02 · Storage layer</div>
+      <div class="storage-row">
+        <div class="node purple node-tg">
+          <div class="node-title">TigerGraph Savanna</div>
+          <div class="node-sub">MedGraph schema · GSQL 2-hop traversal<br>Vertices: Disease, Drug, Symptom, Treatment, Abstract<br>Edges: treats · causes · contraindicates · mentions</div>
+          <span class="pill green-pill">graph DB</span>
+          <span class="pill amber-pill">Hop 1: entity → abstracts</span>
+          <span class="pill amber-pill">Hop 2: abstracts → co-entities</span>
+        </div>
+        <div class="node blue node-faiss">
+          <div class="node-title">FAISS vector index</div>
+          <div class="node-sub">faiss_index.bin · faiss_meta.json<br>13,327 abstract embeddings · top-5 retrieval<br>Cosine similarity search</div>
+          <span class="pill blue-pill">vector DB</span>
+          <span class="pill blue-pill">build_index.py</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- connector -->
+    <div style="display:flex;gap:14px;">
+      <div style="flex:1;display:flex;justify-content:center;">
+        <svg width="20" height="16"><line x1="10" y1="0" x2="10" y2="8" stroke="#2a1a48" stroke-width="1.5"/><polygon points="6,7 10,15 14,7" fill="#2a1a48"/></svg>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;">
+        <svg width="20" height="16"><line x1="10" y1="0" x2="10" y2="8" stroke="#0e2f55" stroke-width="1.5"/><polygon points="6,7 10,15 14,7" fill="#0e2f55"/></svg>
+      </div>
+    </div>
+
+    <!-- PIPELINE LAYER -->
+    <div class="layer pipeline">
+      <div class="layer-label">03 · Pipeline layer</div>
+
+      <div class="pipeline-top">
+        <div class="node amber node-query">
+          <div class="node-title" style="text-align:center;">User query</div>
+          <div class="node-sub" style="text-align:center;">Multi-hop co-mention question</div>
+        </div>
+      </div>
+
+      <!-- fan arrows row -->
+      <div style="display:flex;justify-content:center;margin:4px 0 8px;">
+        <svg width="680" height="28">
+          <!-- left branch to P1 -->
+          <line x1="340" y1="0" x2="155" y2="26" stroke="#4d2010" stroke-width="1.2" stroke-dasharray="3 2"/>
+          <polygon points="148,24 158,30 160,21" fill="#4d2010"/>
+          <!-- center to P2 -->
+          <line x1="340" y1="0" x2="340" y2="22" stroke="#0e2f55" stroke-width="1.2" stroke-dasharray="3 2"/>
+          <polygon points="336,20 340,28 344,20" fill="#0e2f55"/>
+          <!-- right to P3 -->
+          <line x1="340" y1="0" x2="525" y2="26" stroke="#2a1a48" stroke-width="1.2" stroke-dasharray="3 2"/>
+          <polygon points="520,21 522,30 532,24" fill="#2a1a48"/>
+        </svg>
+      </div>
+
+      <div class="pipeline-row">
+        <div class="node coral">
+          <div class="node-title">Pipeline 1 — LLM-only</div>
+          <div class="node-sub">No retrieval · direct prompt<br>Worst-case baseline · pipeline1_baseline.py</div>
+          <span class="pill amber-pill">184 tokens avg</span>
+          <span class="pill blue-pill">0.81s latency</span>
+          <span class="pill green-pill">100% PASS</span>
+        </div>
+        <div class="node blue">
+          <div class="node-title">Pipeline 2 — Basic RAG</div>
+          <div class="node-sub">FAISS top-5 chunks + LLM<br>Industry standard · pipeline2_graphrag.py</div>
+          <span class="pill coral-pill">648 tokens avg</span>
+          <span class="pill blue-pill">0.84s latency</span>
+          <span class="pill green-pill">100% PASS</span>
+        </div>
+        <div class="node purple" style="border-width:1.5px; border-color:#5a2a88;">
+          <div class="node-title">Pipeline 3 — GraphRAG ⭐</div>
+          <div class="node-sub">TigerGraph 2-hop + compact context<br>Entity lists only · pipeline3_hybrid.py</div>
+          <span class="pill green-pill">232 tokens avg</span>
+          <span class="pill blue-pill">0.77s latency</span>
+          <span class="pill green-pill">−64.2% vs RAG</span>
+        </div>
+      </div>
+
+      <!-- arrows converge to Groq -->
+      <div style="display:flex;justify-content:center;margin:8px 0 4px;">
+        <svg width="680" height="22">
+          <line x1="155" y1="0" x2="340" y2="20" stroke="#4d3510" stroke-width="1.2"/>
+          <line x1="340" y1="0" x2="340" y2="20" stroke="#4d3510" stroke-width="1.2"/>
+          <line x1="525" y1="0" x2="340" y2="20" stroke="#4d3510" stroke-width="1.2"/>
+          <polygon points="336,18 340,26 344,18" fill="#4d3510"/>
+        </svg>
+      </div>
+
+      <div class="groq-row">
+        <div class="node amber node-groq">
+          <div class="node-title" style="text-align:center;">Groq — Llama 3.3 70B</div>
+          <div class="node-sub" style="text-align:center;">Shared LLM inference · OpenAI-compatible client<br>14,400 req/day free tier</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- connector -->
+    <div style="display:flex;justify-content:center;">
+      <svg width="20" height="16"><line x1="10" y1="0" x2="10" y2="8" stroke="#4d3510" stroke-width="1.5"/><polygon points="6,7 10,15 14,7" fill="#4d3510"/></svg>
+    </div>
+
+    <!-- EVALUATION LAYER -->
+    <div class="layer eval">
+      <div class="layer-label">04 · Evaluation layer</div>
+      <div class="eval-row">
+        <div class="node green">
+          <div class="node-title">BERTScore</div>
+          <div class="node-sub">roberta-large · F1 semantic similarity<br>GraphRAG: 0.8367 · Baseline: 0.8451 · LLM-only: 0.8645</div>
+          <span class="pill green-pill">Hugging Face</span>
+        </div>
+        <div class="node green">
+          <div class="node-title">LLM-as-a-judge</div>
+          <div class="node-sub">Groq · temperature=0 · PASS / FAIL grading<br>All three pipelines: 100% PASS rate</div>
+          <span class="pill green-pill">✓ Bonus ≥ 90%</span>
+          <span class="pill amber-pill">5 eval questions</span>
+        </div>
+        <div class="node amber">
+          <div class="node-title">Token reduction</div>
+          <div class="node-sub">GraphRAG vs Basic RAG headline metric<br>$0.15/1K vs $0.42/1K · 2.8× cost reduction</div>
+          <span class="pill green-pill">−64.2% tokens</span>
+          <span class="pill green-pill">$0.27 saved / 1K</span>
+        </div>
+      </div>
+      <div class="output-row">
+        <div style="display:flex;justify-content:center;width:200px;margin:8px auto 0;">
+          <svg width="20" height="16"><line x1="10" y1="0" x2="10" y2="8" stroke="#2a2410" stroke-width="1.5"/><polygon points="6,7 10,15 14,7" fill="#2a2410"/></svg>
+        </div>
+      </div>
+      <div class="output-row">
+        <div class="node gray node-output">
+          <div class="node-title" style="text-align:center;">eval_results.json</div>
+          <div class="node-sub" style="text-align:center;">per-question metrics · all pipelines</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">MEDGRAPH-RAG · TIGERGRAPH × PUBMED · GRAPHRAG INFERENCE HACKATHON 2026</div>
+    <div class="footer-right">
+      <div class="legend-item"><div class="legend-dot" style="background:#1ad384;"></div>Data / Eval</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4d9eff;"></div>Vector / Basic RAG</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#b87fff;"></div>Graph / GraphRAG</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f5a623;"></div>LLM / Output</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b3d;"></div>LLM-only</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+[
+  {
+    "pipeline": "baseline",
+    "question": "What drugs are used to treat type 2 diabetes?",
+    "answer": "Noninsulin medications and antidiabetic agents are used to treat type 2 diabetes (Abstracts: [Noninsulin Medications for Type 2 Diabetes], [Antidiabetic agents and dementia risk in type 2 diabetes: A systematic review and network meta-analysis], [Medications for adults with type 2 diabetes: a living systematic review and network meta-analysis]).",
+    "sources": [
+      "42036156",
+      "42008388",
+      "41020901",
+      "41126557",
+      "40813122"
+    ],
+    "num_sources": 5
+  },
+  {
+    "pipeline": "baseline",
+    "question": "What are the symptoms of Alzheimer's disease?",
+    "answer": "The symptoms of Alzheimer's disease are not explicitly stated in the provided abstracts. However, subjective cognitive decline, which includes self-reported increasing confusion or memory loss, is mentioned as a potential prodromal phase of Alzheimer's disease (Abstract 2). \n\nNo abstract directly lists the symptoms of Alzheimer's disease.",
+    "sources": [
+      "42080249",
+      "41984510",
+      "42060990",
+      "41475703",
+      "42042094"
+    ],
+    "num_sources": 5
+  },
+  {
+    "pipeline": "baseline",
+    "question": "How does metformin work?",
+    "answer": "Metformin works by targeting AMPK-dependent cardio-protection and microvascular function (Abstract 2), and modulating metabolic and immune pathways (Abstract 4), although the exact mechanisms of action are not fully described in the provided abstracts. (Abstracts 1, 3)",
+    "sources": [
+      "42054236",
+      "42047732",
+      "41995776",
+      "42081630",
+      "42009100"
+    ],
+    "num_sources": 5
+  }
+]

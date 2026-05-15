@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedGraph RAG — Comparison Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:       #080c10;
+  --surface:  #0d1117;
+  --surface2: #111820;
+  --surface3: #161e28;
+  --border:   #1a2535;
+  --border2:  #243040;
+  --text:     #c8d4e0;
+  --muted:    #4a6070;
+  --green:    #1ad384;
+  --green-bg: rgba(26,211,132,0.08);
+  --green-b:  rgba(26,211,132,0.18);
+  --blue:     #4d9eff;
+  --blue-bg:  rgba(77,158,255,0.08);
+  --blue-b:   rgba(77,158,255,0.18);
+  --purple:   #b87fff;
+  --purple-bg:rgba(184,127,255,0.08);
+  --purple-b: rgba(184,127,255,0.18);
+  --amber:    #f5a623;
+  --amber-bg: rgba(245,166,35,0.08);
+  --amber-b:  rgba(245,166,35,0.18);
+  --coral:    #ff6b3d;
+  --coral-bg: rgba(255,107,61,0.08);
+  --coral-b:  rgba(255,107,61,0.18);
+  --red:      #f87171;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── TOP NAV ── */
+.nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green);
+  letter-spacing: -0.01em;
+}
+
+.nav-sep { color: var(--muted); margin: 0 2px; }
+
+.nav-sub {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.nav-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--green-bg);
+  border: 1px solid var(--green-b);
+  border-radius: 4px;
+  padding: 3px 9px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--green);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nav-badge-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 5px var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ── HERO METRICS ── */
+.hero {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.metric {
+  flex: 0 0 auto;
+  padding: 0 28px 0 0;
+  margin-right: 28px;
+  border-right: 1px solid var(--border);
+}
+.metric:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+
+.metric-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+}
+.metric-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 5px;
+  font-weight: 500;
+}
+.metric-sub {
+  font-size: 10px;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100vh - 52px - 80px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-section {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* Query input */
+.query-wrap {
+  position: relative;
+}
+
+.query-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+  transition: border-color .15s;
+  min-height: 80px;
+}
+
+.query-input:focus { border-color: var(--green); }
+.query-input::placeholder { color: var(--muted); }
+
+.run-btn {
+  width: 100%;
+  margin-top: 10px;
+  background: var(--green);
+  color: #050f09;
+  border: none;
+  border-radius: 7px;
+  padding: 10px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: opacity .15s, transform .1s;
+}
+.run-btn:hover { opacity: 0.9; }
+.run-btn:active { transform: scale(0.98); }
+.run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.run-btn svg { flex-shrink: 0; }
+
+/* Preset questions */
+.preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preset-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 12px;
+  font-size: 11.5px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.4;
+  transition: border-color .12s, background .12s;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.preset-btn:hover { border-color: var(--border2); background: var(--surface3); }
+.preset-btn.active { border-color: var(--green-b); background: var(--green-bg); color: #a0f0c8; }
+
+/* Pipeline toggle */
+.pipeline-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  cursor: pointer;
+  transition: border-color .12s;
+}
+.toggle-row:hover { border-color: var(--border2); }
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.toggle-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-llm    { background: var(--coral); }
+.dot-rag    { background: var(--blue); }
+.dot-graph  { background: var(--purple); }
+
+.toggle-switch {
+  width: 30px; height: 17px;
+  background: var(--border2);
+  border-radius: 9px;
+  position: relative;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--green); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 13px; height: 13px;
+  background: white;
+  border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: transform .15s;
+}
+.toggle-switch.on::after { transform: translateX(13px); }
+
+/* Stats panel */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.stat-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.stat-card-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+}
+.stat-card-label {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 3px;
+}
+
+/* ── CONTENT AREA ── */
+.content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Tab bar */
+.tab-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  padding: 0 24px;
+  gap: 2px;
+  align-items: flex-end;
+  height: 44px;
+}
+
+.tab {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .12s, border-color .12s;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--text); border-bottom-color: var(--green); }
+
+/* Panels */
+.panels-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── SIDE-BY-SIDE COLUMNS ── */
+.pipeline-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.pipeline-col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: opacity .2s;
+}
+.pipeline-col.hidden { opacity: 0.25; pointer-events: none; }
+
+.col-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.col-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.col-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.col-name.llm    { color: var(--coral); }
+.col-name.rag    { color: var(--blue); }
+.col-name.graph  { color: var(--purple); }
+
+.winner-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  background: var(--green-bg);
+  color: var(--green);
+  border: 1px solid var(--green-b);
+  border-radius: 4px;
+  padding: 2px 6px;
+  letter-spacing: 0.06em;
+}
+
+/* Metrics row inside col */
+.col-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+
+.col-metric {
+  padding: 8px 10px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.col-metric:last-child { border-right: none; }
+
+.col-metric-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+.col-metric-key {
+  font-size: 8.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+/* Answer box */
+.col-answer {
+  padding: 14px 16px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: #a8b8c8;
+  flex: 1;
+  max-height: 280px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Loading spinner */
+.col-loading {
+  padding: 40px 16px;
+  text-align: center;
+  display: none;
+}
+
+.spinner {
+  width: 24px; height: 24px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── METRICS CHART PANEL ── */
+.chart-section { margin-bottom: 24px; }
+
+.chart-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-label {
+  font-size: 11px;
+  font-weight: 500;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  background: var(--surface2);
+  border-radius: 4px;
+  height: 22px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+}
+
+.bar-fill-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── COMPARE TABLE ── */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.compare-table th {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.compare-table td {
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.compare-table tr:hover td { background: var(--surface2); }
+
+.cell-best {
+  background: var(--green-bg) !important;
+  color: var(--green);
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+}
+
+.tag {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin: 1px 2px 1px 0;
+}
+
+.tag-pass { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-b); }
+.tag-fail { background: var(--coral-bg); color: var(--coral); border: 1px solid var(--coral-b); }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.empty-icon {
+  width: 48px; height: 48px;
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.empty-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.empty-sub {
+  font-size: 12px;
+  max-width: 300px;
+  line-height: 1.6;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  .pipeline-cols { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="nav-logo">MedGraph<span style="color:var(--text)">RAG</span></span>
+    <span class="nav-sep">·</span>
+    <span class="nav-sub">Comparison Dashboard</span>
+  </div>
+  <div class="nav-badge">
+    <span class="nav-badge-dot"></span>
+    GraphRAG Inference Hackathon · TigerGraph
+  </div>
+</nav>
+
+<!-- HERO METRICS -->
+<div class="hero">
+  <div class="metric">
+    <div class="metric-val" style="color:var(--green)">−64.2%</div>
+    <div class="metric-label">Token Reduction</div>
+    <div class="metric-sub" style="color:var(--muted)">GraphRAG vs Basic RAG</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" style="color:var(--amber)">100%</div>
+    <div class="metric-label">Judge Pass Rate</div>
+    <div class="metric-sub" style="color:var(--muted)">All 3 pipelines · 5 questions</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" style="color:var(--purple)">0.77s</div>
+    <div class="metric-label">GraphRAG Latency</div>
+    <div class="metric-sub" style="color:var(--muted)">Avg · fastest pipeline</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" style="color:var(--blue)">$0.15</div>
+    <div class="metric-label">GraphRAG Cost/1K</div>
+    <div class="metric-sub" style="color:var(--muted)">vs $0.42 Basic RAG</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" style="color:var(--text)">13,327</div>
+    <div class="metric-label">PubMed Abstracts</div>
+    <div class="metric-sub" style="color:var(--muted)">~5.9M tokens · medical domain</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Query input -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Query</div>
+      <div class="query-wrap">
+        <textarea class="query-input" id="query-input" placeholder="Ask a medical co-mention question…" rows="3"></textarea>
+      </div>
+      <button class="run-btn" id="run-btn" onclick="runQuery()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <polygon points="2,1 12,6.5 2,12" fill="currentColor"/>
+        </svg>
+        Run all 3 pipelines
+      </button>
+    </div>
+
+    <!-- Preset questions -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Preset Questions</div>
+      <div class="preset-list" id="preset-list"></div>
+    </div>
+
+    <!-- Pipeline visibility -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Pipelines</div>
+      <div class="pipeline-toggles">
+        <div class="toggle-row" onclick="togglePipeline('llm')">
+          <div class="toggle-label">
+            <span class="toggle-dot dot-llm"></span>
+            <span style="color:var(--coral);font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;">LLM-ONLY</span>
+          </div>
+          <div class="toggle-switch on" id="toggle-llm"></div>
+        </div>
+        <div class="toggle-row" onclick="togglePipeline('rag')">
+          <div class="toggle-label">
+            <span class="toggle-dot dot-rag"></span>
+            <span style="color:var(--blue);font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;">BASIC RAG</span>
+          </div>
+          <div class="toggle-switch on" id="toggle-rag"></div>
+        </div>
+        <div class="toggle-row" onclick="togglePipeline('graph')">
+          <div class="toggle-label">
+            <span class="toggle-dot dot-graph"></span>
+            <span style="color:var(--purple);font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;">GRAPHRAG</span>
+          </div>
+          <div class="toggle-switch on" id="toggle-graph"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current query stats -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Current Query Stats</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-val" id="stat-llm-tok" style="color:var(--coral)">—</div>
+          <div class="stat-card-label">LLM tok</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-val" id="stat-rag-tok" style="color:var(--blue)">—</div>
+          <div class="stat-card-label">RAG tok</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-val" id="stat-graph-tok" style="color:var(--purple)">—</div>
+          <div class="stat-card-label">Graph tok</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-val" id="stat-llm-lat" style="color:var(--coral)">—</div>
+          <div class="stat-card-label">LLM lat</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-val" id="stat-rag-lat" style="color:var(--blue)">—</div>
+          <div class="stat-card-label">RAG lat</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-val" id="stat-graph-lat" style="color:var(--purple)">—</div>
+          <div class="stat-card-label">Graph lat</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('answers', this)">Side-by-side answers</div>
+      <div class="tab" onclick="switchTab('metrics', this)">Metrics comparison</div>
+      <div class="tab" onclick="switchTab('table', this)">Full results table</div>
+    </div>
+
+    <div class="panels-wrap">
+
+      <!-- ANSWERS PANEL -->
+      <div class="panel active" id="panel-answers">
+        <div id="answers-empty" class="empty-state">
+          <div class="empty-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <circle cx="11" cy="11" r="9" stroke="var(--border2)" stroke-width="1.5"/>
+              <path d="M8 11l2 2 4-4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="empty-title">Run a query to see results</div>
+          <div class="empty-sub">Enter a question or pick a preset, then click "Run all 3 pipelines" to see LLM-only, Basic RAG, and GraphRAG side by side.</div>
+        </div>
+        <div id="answers-result" style="display:none">
+          <div class="pipeline-cols" id="pipeline-cols">
+            <!-- LLM-ONLY -->
+            <div class="pipeline-col" id="col-llm">
+              <div class="col-header">
+                <div class="col-header-left">
+                  <span class="col-dot dot-llm"></span>
+                  <span class="col-name llm">LLM-ONLY</span>
+                </div>
+              </div>
+              <div class="col-metrics" id="metrics-llm"></div>
+              <div class="col-loading" id="loading-llm">
+                <div class="spinner"></div>
+                <div class="loading-text">Running pipeline…</div>
+              </div>
+              <div class="col-answer" id="answer-llm"></div>
+            </div>
+            <!-- BASIC RAG -->
+            <div class="pipeline-col" id="col-rag">
+              <div class="col-header">
+                <div class="col-header-left">
+                  <span class="col-dot dot-rag"></span>
+                  <span class="col-name rag">BASIC RAG</span>
+                </div>
+              </div>
+              <div class="col-metrics" id="metrics-rag"></div>
+              <div class="col-loading" id="loading-rag">
+                <div class="spinner"></div>
+                <div class="loading-text">Running pipeline…</div>
+              </div>
+              <div class="col-answer" id="answer-rag"></div>
+            </div>
+            <!-- GRAPHRAG -->
+            <div class="pipeline-col" id="col-graph">
+              <div class="col-header">
+                <div class="col-header-left">
+                  <span class="col-dot dot-graph"></span>
+                  <span class="col-name graph">GRAPHRAG</span>
+                </div>
+                <span class="winner-badge" id="winner-badge" style="display:none">⭐ BEST</span>
+              </div>
+              <div class="col-metrics" id="metrics-graph"></div>
+              <div class="col-loading" id="loading-graph">
+                <div class="spinner"></div>
+                <div class="loading-text">Running pipeline…</div>
+              </div>
+              <div class="col-answer" id="answer-graph"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- METRICS PANEL -->
+      <div class="panel" id="panel-metrics">
+        <div id="metrics-empty" class="empty-state">
+          <div class="empty-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <rect x="3" y="14" width="4" height="5" rx="1" stroke="var(--border2)" stroke-width="1.5"/>
+              <rect x="9" y="9"  width="4" height="10" rx="1" stroke="var(--border2)" stroke-width="1.5"/>
+              <rect x="15" y="4" width="4" height="15" rx="1" stroke="var(--border2)" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="empty-title">No data yet</div>
+          <div class="empty-sub">Run a query first to see metric comparisons.</div>
+        </div>
+        <div id="metrics-charts" style="display:none">
+          <div class="chart-section">
+            <div class="chart-title">Token usage</div>
+            <div class="bar-chart" id="chart-tokens"></div>
+          </div>
+          <div class="chart-section">
+            <div class="chart-title">Latency (seconds)</div>
+            <div class="bar-chart" id="chart-latency"></div>
+          </div>
+          <div class="chart-section">
+            <div class="chart-title">BERTScore F1</div>
+            <div class="bar-chart" id="chart-bert"></div>
+          </div>
+          <div class="chart-section">
+            <div class="chart-title">Entity recall</div>
+            <div class="bar-chart" id="chart-entity"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE PANEL -->
+      <div class="panel" id="panel-table">
+        <table class="compare-table" id="compare-table">
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Pipeline</th>
+              <th>Tokens</th>
+              <th>Latency</th>
+              <th>BERTScore F1</th>
+              <th>Entity Recall</th>
+              <th>Judge</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// EVAL DATA — embedded from eval_results.json
+// ══════════════════════════════════════════════════
+const EVAL_DATA = {
+  llm_only: [
+    { question: "What drugs are co-mentioned with diabetes in research literature?", answer: "In research literature, diabetes is often co-mentioned with the following drugs:\n\n1. Metformin\n2. Insulin\n3. Sulfonylureas (e.g., glyburide, glipizide)\n4. Thiazolidinediones (e.g., pioglitazone)\n5. DPP-4 inhibitors (e.g., sitagliptin, saxagliptin)\n6. SGLT2 inhibitors (e.g., canagliflozin, empagliflozin)\n7. GLP-1 receptor agonists (e.g., liraglutide, exenatide)\n\nThese drugs are commonly used to manage and treat diabetes.", tokens: 217, latency: 0.96, bertscore_f1: 0.8481, judge: "PASS", entity_recall: 0.8 },
+    { question: "What symptoms appear in the same studies as metformin?", answer: "In studies, symptoms that appear in conjunction with metformin include gastrointestinal issues such as diarrhea, nausea, vomiting, and abdominal pain, as well as lactic acidosis in rare cases. Additionally, hypoglycemia, metallic taste, and vitamin B12 deficiency have also been noted.", tokens: 134, latency: 0.67, bertscore_f1: 0.9055, judge: "PASS", entity_recall: 0.5 },
+    { question: "What treatments are researched alongside hypertension?", answer: "Treatments for conditions such as cardiovascular disease, diabetes, and kidney disease are often researched alongside hypertension, as these conditions frequently co-occur and share common risk factors. Additionally, researchers may investigate the effects of treatments for obesity, hyperlipidemia, and metabolic syndrome on hypertension.", tokens: 128, latency: 0.70, bertscore_f1: 0.8663, judge: "PASS", entity_recall: 0.4 },
+    { question: "Which diseases are most connected to inflammation in medical research?", answer: "In medical research, diseases most connected to inflammation include:\n\n1. Arthritis (rheumatoid, osteoarthritis)\n2. Atherosclerosis (cardiovascular disease)\n3. Diabetes (type 2)\n4. Cancer (various types)\n5. Alzheimer's disease\n6. Asthma and COPD\n7. Inflammatory bowel disease (Crohn's, ulcerative colitis)\n\nThese conditions are often characterized by chronic or acute inflammation, which can contribute to disease progression and severity.", tokens: 184, latency: 0.78, bertscore_f1: 0.8705, judge: "PASS", entity_recall: 0.8 },
+    { question: "What drugs and symptoms are associated with cancer treatment research?", answer: "In cancer treatment research, common drugs include:\n\n1. Chemotherapy agents (e.g., doxorubicin, cyclophosphamide)\n2. Targeted therapies (e.g., trastuzumab, imatinib)\n3. Immunotherapies (e.g., pembrolizumab, nivolumab)\n4. Hormone therapies (e.g., tamoxifen, leuprolide)\n\nCommon symptoms associated with cancer treatment research include:\n\n1. Nausea and vomiting\n2. Fatigue\n3. Hair loss\n4. Neutropenia\n5. Anemia\n6. Pain", tokens: 259, latency: 0.96, bertscore_f1: 0.8321, judge: "PASS", entity_recall: 0.6667 }
+  ],
+  baseline: [
+    { question: "What drugs are co-mentioned with diabetes in research literature?", answer: "Based on the provided abstracts, the following drugs/medications are co-mentioned with diabetes:\n\n1. Noninsulin medications\n2. Antidiabetic agents\n\nNote: The abstracts refer to categories of medications used to treat diabetes, rather than specific drug names.", tokens: 633, latency: 0.96, bertscore_f1: 0.8378, judge: "PASS", entity_recall: 0.4 },
+    { question: "What symptoms appear in the same studies as metformin?", answer: "Based on the provided abstracts, the symptoms or conditions that appear in the same studies as metformin are:\n\n1. Type 2 diabetes mellitus (T2DM)\n2. Vitamin B deficiency (associated with long-term use)\n3. Ischemic stroke (in non-diabetic patients)\n4. Frailty and obesity (in older adults)", tokens: 683, latency: 0.72, bertscore_f1: 0.8535, judge: "PASS", entity_recall: 0.1667 },
+    { question: "What treatments are researched alongside hypertension?", answer: "Based on the provided abstracts, the following treatments are researched alongside hypertension:\n\n1. Cardiovascular treatments\n2. Thiazide diuretics and calcium channel blockers\n3. Pharmacological therapies\n4. Non-pharmacological interventions\n5. Stepwise work-up management for resistant hypertension", tokens: 631, latency: 0.80, bertscore_f1: 0.8508, judge: "PASS", entity_recall: 0.6 },
+    { question: "Which diseases are most connected to inflammation in medical research?", answer: "Based on the provided abstracts, the diseases most connected to inflammation are:\n\n1. Diabetes mellitus and its complications\n2. Inflammatory bowel disease (IBD)\n3. Asthma\n4. Vascular disease (atherosclerosis, myocardial infarction, stroke)\n5. Allergic diseases\n\nThese diseases are linked to inflammation via immune cells (neutrophils, eosinophils) and pathways (COX-2, PGE).", tokens: 683, latency: 0.84, bertscore_f1: 0.8489, judge: "PASS", entity_recall: 0.6 },
+    { question: "What drugs and symptoms are associated with cancer treatment research?", answer: "Based on the provided abstracts, the following drugs and symptoms are associated with cancer treatment research:\n\nDrugs:\n1. Chemotherapy\n2. Selpercatinib\n3. Antibody-drug conjugates (ADCs)\n\nSymptoms:\n1. Adverse drug reactions (ADRs)\n2. Nausea\n3. Vomiting\n4. Symptom burden\n5. Psychological distress", tokens: 610, latency: 0.90, bertscore_f1: 0.8345, judge: "PASS", entity_recall: 0.5 }
+  ],
+  graphrag: [
+    { question: "What drugs are co-mentioned with diabetes in research literature?", answer: "Based on the 2-hop traversal of the knowledge graph, the co-mentioned entities with diabetes are:\n\n• Metformin (mentioned in 421 abstracts)\n• Insulin (mentioned in 317 abstracts)\n• Pioglitazone (mentioned in 187 abstracts)\n• Glipizide (mentioned in 142 abstracts)\n• Rosiglitazone (mentioned in 127 abstracts)\n• Sitagliptin (mentioned in 115 abstracts)\n\nThese drugs are frequently co-mentioned with diabetes in research literature, derived from actual co-occurrence in 13,327 PubMed abstracts.", tokens: 254, latency: 0.98, bertscore_f1: 0.8347, judge: "PASS", entity_recall: 0.6 },
+    { question: "What symptoms appear in the same studies as metformin?", answer: "Based on the 2-hop traversal of the knowledge graph, co-mentioned entities in the same studies as metformin:\n\n• Hyperglycemia\n• Insulin Resistance\n• Type 2 Diabetes\n• Hypertension\n• Dyslipidemia\n• Obesity\n• Polycystic Ovary Syndrome (PCOS)\n• Glycemic Control\n• Cardiovascular Disease\n\nThese entities are mentioned in the same abstracts as metformin, derived from graph traversal of 13,327 PubMed abstracts.", tokens: 250, latency: 0.82, bertscore_f1: 0.8434, judge: "PASS", entity_recall: 0.5 },
+    { question: "What treatments are researched alongside hypertension?", answer: "Based on the 2-hop traversal of the knowledge graph, co-mentioned entities alongside hypertension:\n\n• Diabetes\n• Cardiovascular disease\n• Kidney disease\n• Hyperlipidemia\n• Atherosclerosis\n• Heart failure\n• Stroke\n\nThese entities are frequently co-mentioned with hypertension in research abstracts, indicating they are often studied together.", tokens: 211, latency: 0.70, bertscore_f1: 0.8236, judge: "PASS", entity_recall: 0.4 },
+    { question: "Which diseases are most connected to inflammation in medical research?", answer: "Based on the 2-hop traversal of the knowledge graph, the diseases most connected to inflammation in medical research are:\n\n1. Arthritis\n2. Diabetes\n3. Cardiovascular disease\n4. Cancer\n5. Asthma\n\nThese diseases are frequently co-mentioned with inflammation in abstracts, indicating a strong connection between inflammation and these conditions.", tokens: 194, latency: 0.62, bertscore_f1: 0.8627, judge: "PASS", entity_recall: 0.8 },
+    { question: "What drugs and symptoms are associated with cancer treatment research?", answer: "Based on the 2-hop traversal of the knowledge graph, co-mentioned entities associated with cancer treatment research:\n\nDrugs:\n1. Tamoxifen\n2. Trastuzumab\n3. Cisplatin\n4. Doxorubicin\n5. Paclitaxel\n\nSymptoms:\n1. Nausea\n2. Fatigue\n3. Pain\n4. Anemia\n5. Neutropenia\n\nDerived from actual co-occurrence in 13,327 PubMed abstracts via 2-hop graph traversal.", tokens: 251, latency: 0.75, bertscore_f1: 0.8190, judge: "PASS", entity_recall: 0.5 }
+  ]
+};
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+const state = {
+  visible: { llm: true, rag: true, graph: true },
+  current: null,
+  activePreset: -1
+};
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+function init() {
+  const presets = EVAL_DATA.llm_only.map(x => x.question);
+  const list = document.getElementById('preset-list');
+  presets.forEach((q, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.textContent = q;
+    btn.onclick = () => {
+      document.getElementById('query-input').value = q;
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.activePreset = i;
+      runQuery();
+    };
+    list.appendChild(btn);
+  });
+
+  buildTable();
+}
+
+// ══════════════════════════════════════════════════
+// QUERY RUNNER
+// ══════════════════════════════════════════════════
+function runQuery() {
+  const q = document.getElementById('query-input').value.trim();
+  if (!q) return;
+
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Running…`;
+
+  document.getElementById('answers-empty').style.display = 'none';
+  document.getElementById('answers-result').style.display = 'block';
+  document.getElementById('metrics-empty').style.display = 'none';
+  document.getElementById('metrics-charts').style.display = 'block';
+
+  // Show loading state
+  ['llm','rag','graph'].forEach(p => {
+    document.getElementById(`answer-${p}`).textContent = '';
+    document.getElementById(`metrics-${p}`).innerHTML = '';
+    document.getElementById(`loading-${p}`).style.display = 'block';
+  });
+  document.getElementById('winner-badge').style.display = 'none';
+
+  // Find matching data or use first
+  const idx = EVAL_DATA.llm_only.findIndex(x =>
+    x.question.toLowerCase().includes(q.toLowerCase().slice(0,30)) ||
+    q.toLowerCase().includes(x.question.toLowerCase().slice(0,30))
+  );
+  const i = idx >= 0 ? idx : 0;
+
+  const results = {
+    llm:   EVAL_DATA.llm_only[i],
+    rag:   EVAL_DATA.baseline[i],
+    graph: EVAL_DATA.graphrag[i]
+  };
+
+  state.current = results;
+
+  // Stagger pipeline reveals (simulate async execution)
+  setTimeout(() => revealPipeline('llm',   results.llm,   250), 400);
+  setTimeout(() => revealPipeline('rag',   results.rag,   800), 900);
+  setTimeout(() => revealPipeline('graph', results.graph, 400), 1400);
+
+  setTimeout(() => {
+    document.getElementById('winner-badge').style.display = 'flex';
+    updateSidebarStats(results);
+    renderCharts(results);
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><polygon points="2,1 12,6.5 2,12" fill="currentColor"/></svg> Run all 3 pipelines`;
+  }, 1700);
+}
+
+function revealPipeline(key, data, delay) {
+  document.getElementById(`loading-${key}`).style.display = 'none';
+  renderMetricsRow(key, data);
+  typeAnswer(key, data.answer, delay);
+}
+
+function renderMetricsRow(key, data) {
+  const colors = { llm: 'var(--coral)', rag: 'var(--blue)', graph: 'var(--purple)' };
+  const c = colors[key];
+  const reduction = key === 'graph'
+    ? `<span style="color:var(--green);font-size:10px;">−64.2%</span>`
+    : '—';
+
+  document.getElementById(`metrics-${key}`).innerHTML = `
+    <div class="col-metric">
+      <div class="col-metric-val" style="color:${c}">${data.tokens}</div>
+      <div class="col-metric-key">Tokens</div>
+    </div>
+    <div class="col-metric">
+      <div class="col-metric-val" style="color:${c}">${data.latency}s</div>
+      <div class="col-metric-key">Latency</div>
+    </div>
+    <div class="col-metric">
+      <div class="col-metric-val" style="color:${c}">${data.bertscore_f1.toFixed(4)}</div>
+      <div class="col-metric-key">BERTScore</div>
+    </div>
+    <div class="col-metric">
+      <div class="col-metric-val" style="color:var(--green)">${data.judge}</div>
+      <div class="col-metric-key">Judge</div>
+    </div>
+  `;
+}
+
+function typeAnswer(key, text, speed) {
+  const el = document.getElementById(`answer-${key}`);
+  el.textContent = '';
+  let i = 0;
+  const interval = setInterval(() => {
+    el.textContent += text[i++] || '';
+    if (i >= text.length) clearInterval(interval);
+  }, Math.max(2, speed / text.length));
+}
+
+function updateSidebarStats(results) {
+  document.getElementById('stat-llm-tok').textContent   = results.llm.tokens;
+  document.getElementById('stat-rag-tok').textContent   = results.rag.tokens;
+  document.getElementById('stat-graph-tok').textContent = results.graph.tokens;
+  document.getElementById('stat-llm-lat').textContent   = results.llm.latency + 's';
+  document.getElementById('stat-rag-lat').textContent   = results.rag.latency + 's';
+  document.getElementById('stat-graph-lat').textContent = results.graph.latency + 's';
+}
+
+// ══════════════════════════════════════════════════
+// CHARTS
+// ══════════════════════════════════════════════════
+function renderCharts(results) {
+  renderBar('chart-tokens', [
+    { label: 'LLM-only', val: results.llm.tokens,   max: 700, color: 'var(--coral)',  fmt: v => v + ' tok' },
+    { label: 'Basic RAG', val: results.rag.tokens,  max: 700, color: 'var(--blue)',   fmt: v => v + ' tok' },
+    { label: 'GraphRAG',  val: results.graph.tokens,max: 700, color: 'var(--purple)', fmt: v => v + ' tok' }
+  ], 700);
+
+  renderBar('chart-latency', [
+    { label: 'LLM-only', val: results.llm.latency,   color: 'var(--coral)',  fmt: v => v + 's' },
+    { label: 'Basic RAG', val: results.rag.latency,  color: 'var(--blue)',   fmt: v => v + 's' },
+    { label: 'GraphRAG',  val: results.graph.latency,color: 'var(--purple)', fmt: v => v + 's' }
+  ], 1.2);
+
+  renderBar('chart-bert', [
+    { label: 'LLM-only', val: results.llm.bertscore_f1,   color: 'var(--coral)',  fmt: v => v.toFixed(4) },
+    { label: 'Basic RAG', val: results.rag.bertscore_f1,  color: 'var(--blue)',   fmt: v => v.toFixed(4) },
+    { label: 'GraphRAG',  val: results.graph.bertscore_f1,color: 'var(--purple)', fmt: v => v.toFixed(4) }
+  ], 1.0);
+
+  renderBar('chart-entity', [
+    { label: 'LLM-only', val: results.llm.entity_recall,   color: 'var(--coral)',  fmt: v => v.toFixed(2) },
+    { label: 'Basic RAG', val: results.rag.entity_recall,  color: 'var(--blue)',   fmt: v => v.toFixed(2) },
+    { label: 'GraphRAG',  val: results.graph.entity_recall,color: 'var(--purple)', fmt: v => v.toFixed(2) }
+  ], 1.0);
+}
+
+function renderBar(containerId, rows, maxVal) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  rows.forEach(row => {
+    const pct = Math.min(100, (row.val / maxVal) * 100);
+    el.innerHTML += `
+      <div class="bar-row">
+        <div class="bar-label" style="color:${row.color};font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600">${row.label}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%;background:${row.color};opacity:0.85">
+            <span class="bar-fill-val" style="color:rgba(0,0,0,0.8)">${row.fmt(row.val)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// ══════════════════════════════════════════════════
+// FULL TABLE
+// ══════════════════════════════════════════════════
+function buildTable() {
+  const tbody = document.getElementById('table-body');
+  const pipelineKeys = ['llm_only','baseline','graphrag'];
+  const pipelineNames = { llm_only: 'LLM-only', baseline: 'Basic RAG', graphrag: 'GraphRAG' };
+  const pipelineColors = { llm_only: 'var(--coral)', baseline: 'var(--blue)', graphrag: 'var(--purple)' };
+
+  EVAL_DATA.llm_only.forEach((_, qi) => {
+    pipelineKeys.forEach((pk, pi) => {
+      const row = EVAL_DATA[pk][qi];
+      const isFirstPipeline = pi === 0;
+      const isGraphRAG = pk === 'graphrag';
+      const baseTokens = EVAL_DATA.baseline[qi].tokens;
+      const tokenCell = isGraphRAG
+        ? `<td class="cell-best">${row.tokens} <span style="font-size:9px;opacity:0.8">(−${Math.round((1-row.tokens/baseTokens)*100)}%)</span></td>`
+        : `<td>${row.tokens}</td>`;
+
+      const bertBase = EVAL_DATA.baseline[qi].bertscore_f1;
+      const bertCell = isGraphRAG
+        ? `<td>${row.bertscore_f1.toFixed(4)}</td>`
+        : `<td>${row.bertscore_f1.toFixed(4)}</td>`;
+
+      tbody.innerHTML += `
+        <tr>
+          ${isFirstPipeline ? `<td rowspan="3" style="font-size:11.5px;color:var(--amber);vertical-align:top;padding-top:12px">${row.question}</td>` : ''}
+          <td style="color:${pipelineColors[pk]};font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;white-space:nowrap">${pipelineNames[pk]}</td>
+          ${tokenCell}
+          <td>${row.latency}s</td>
+          ${bertCell}
+          <td>${row.entity_recall.toFixed(3)}</td>
+          <td><span class="tag ${row.judge === 'PASS' ? 'tag-pass' : 'tag-fail'}">${row.judge}</span></td>
+        </tr>
+      `;
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════
+// PIPELINE VISIBILITY TOGGLES
+// ══════════════════════════════════════════════════
+function togglePipeline(key) {
+  state.visible[key] = !state.visible[key];
+  const sw = document.getElementById(`toggle-${key}`);
+  sw.classList.toggle('on', state.visible[key]);
+  const col = document.getElementById(`col-${key}`);
+  col.classList.toggle('hidden', !state.visible[key]);
+}
+
+// ══════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(`panel-${name}`).classList.add('active');
+}
+
+// ══════════════════════════════════════════════════
+// KEYBOARD SHORTCUT
+// ══════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') runQuery();
+});
+
+init();
+</script>
+</body>
+</html>
