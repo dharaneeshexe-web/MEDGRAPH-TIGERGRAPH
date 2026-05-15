@@ -174,8 +174,8 @@ Total infrastructure cost: **$0** (all free tiers).
 
 ## 🔗 Links
 
-- 📝 [Blog post](YOUR_BLOG_URL)
-- 🎥 [Demo video](YOUR_VIDEO_URL)
+- 📝 [Blog post](https://hackathon-tigergraph.hashnode.dev/)
+- 🎥 [Demo video](https://drive.google.com/drive/folders/1USiLUmx9v9a_HLuaNZmgOriEGdT8LDQL?usp=sharing)
 
 ---
 
